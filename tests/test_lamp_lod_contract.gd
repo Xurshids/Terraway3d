@@ -70,7 +70,8 @@ func _test_zero_and_unbounded_limits() -> void:
 func _test_tie_order_and_mobile_cap() -> void:
 	var points: Array[Vector3] = []
 	for i in range(20):
-		points.append(Vector3(float(i + 1), 0, 0))
+		var x := 1.0 if i % 2 == 0 else -1.0
+		points.append(Vector3(x, 0.0, 0.0))
 	var got := LampLightController.select_nearest_indices(points, Vector3.ZERO, 0.0, 20)
 	assert(got.size() == 8, "Mobile light cap must never exceed eight")
-	assert(got == [0, 1, 2, 3, 4, 5, 6, 7], "Equal-distance ordering must be deterministic")
+	assert(got == [0, 1, 2, 3, 4, 5, 6, 7], "Equal-distance ordering must preserve stable source order")
