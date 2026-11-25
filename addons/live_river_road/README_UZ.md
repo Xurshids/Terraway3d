@@ -1,4 +1,4 @@
-# Live River & Road Studio v0.3.0
+# Live River & Road Studio v0.4.0
 
 Godot 4.8 + Terrain3D uchun daryo va yo'l plagini.
 
@@ -59,7 +59,7 @@ Eski sahnalar ishlaydi (mavjud xususiyat nomlari o'zgarmagan).
 
 ---
 
-## v0.3.0 yangiliklar
+## v0.4.0 yangiliklar
 
 ### Chorrahalar va aylana (roundabout)
 - Yo'llar kesishganda (yoki bir yo'l uchi boshqasiga tegsa — T-chorraha) avtomatik **chorraha** quriladi: yumaloq burchaklar, yo'llar chorraha chetida aniq kesiladi, balandlik silliq tenglashadi.
@@ -77,3 +77,22 @@ Eski sahnalar ishlaydi (mavjud xususiyat nomlari o'zgarmagan).
 ### Keskin burilishlar
 - Ichki chekka burilish radiusidan oshmaydi (o'zini kesib o'tmaydi), tashqi chekka miter bilan uzayadi.
 - UV har bir chekka uchun o'z yoy uzunligi bo'yicha hisoblanadi: tekstura cho'zilmaydi va bukilmaydi.
+
+## v0.4.0 — LOD va mobil yoritish
+
+### Yoritgichlar uchun 3D LOD
+- Billboard ishlatilmaydi: LOD0 to'liq 3D, LOD1 soddalashtirilgan 3D, LOD2 uzoq masofa uchun engil 3D.
+- Har bir LOD uchun alohida mesh/material va albedo tekstura tayinlash mumkin.
+- Yoritgichlar yo'l bo'ylab fazoviy chunk'larga ajratiladi; har bir chunk LOD bo'yicha alohida MultiMesh ishlatadi.
+- Uzoq masofadagi chiroq boshi emissive bo'lib qoladi, ammo haqiqiy OmniLight3D nuri faqat kamera yaqinidagi cheklangan chiroqlarda yoqiladi.
+- max_active_lights mobil qurilmalar uchun 8 dan oshmaydi; standart 6.
+- Kun/tun skripti LampLightController.set_night_mode(bool) orqali haqiqiy nurlarni boshqarishi mumkin. Emissive ko'rinish alohida saqlanadi.
+
+### Yoritgich LOD sozlamalari
+LiveRoad3D → lamp_settings:
+- lod0_end_distance, lod1_end_distance, lod_chunk_length
+- lod1_mesh, lod2_mesh
+- har bir LOD uchun poya/bosh materiallari va albedo teksturalari
+- light_activation_range, max_active_lights, light_update_interval, night_mode_enabled
+
+Eslatma: LOD chegaralari va yoritish saralashi uchun avtomatlashtirilgan GDScript kontrakt testlari qo'shildi. Godot executable ushbu ish muhitida mavjud bo'lmagani sababli testlar hozircha Godot ichida ishga tushirilmagan.
