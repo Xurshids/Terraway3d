@@ -3,12 +3,13 @@ extends Path3D
 
 const TerrainCarver := preload("res://addons/live_river_road/terrain_carver.gd")
 const PathMath := preload("res://addons/live_river_road/path_math.gd")
+const LampSettingsScript := preload("res://addons/live_river_road/lamp_settings.gd")
 const WATER_SHADER := preload("res://addons/live_river_road/shaders/live_water.gdshader")
 const ROAD_SHADER := preload("res://addons/live_river_road/shaders/live_road.gdshader")
 
 @export_group("Plugin")
 ## O'rnatilgan Live River & Road Studio versiyasi.
-@export var plugin_version: String = "0.4.3"
+@export var plugin_version: String = "0.4.4"
 
 @export_group("Terrain")
 
@@ -593,7 +594,7 @@ func get_panel_target(key: String, create: bool) -> Object:
 		"lamp":
 			var ls: Object = get("lamp_settings")
 			if ls == null and create and has_method("clear_lamp_marks"):
-				ls = LiveLampSettings.new()
+				ls = LampSettingsScript.new()
 				set("lamp_settings", ls)
 			return ls
 		"road_ts":
