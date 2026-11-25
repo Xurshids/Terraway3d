@@ -141,6 +141,26 @@ var _mute := false
 	set(v):
 		light_energy = v
 		_emit()
+## Bir vaqtda ishlaydigan haqiqiy chiroqlar soni. Mobil uchun 8 dan oshmaydi.
+@export_range(0, 8, 1) var max_active_lights: int = 6:
+	set(v):
+		max_active_lights = clampi(v, 0, 8)
+		_emit()
+## Haqiqiy yorug'lik faqat kamera shu radius ichida bo'lganda yoqiladi.
+@export_range(0.0, 200.0, 1.0, "or_greater") var light_activation_range: float = 45.0:
+	set(v):
+		light_activation_range = v
+		_emit()
+## Kamera bo'yicha yorug'lik ro'yxatini yangilash oralig'i.
+@export_range(0.1, 2.0, 0.05) var light_update_interval: float = 0.35:
+	set(v):
+		light_update_interval = v
+		_emit()
+## O'yin kunduz/tun tizimi bo'lmasa true; tun-kun skriptidan set_night_mode() chaqirish mumkin.
+@export var night_mode_enabled: bool = true:
+	set(v):
+		night_mode_enabled = v
+		_emit()
 @export_group("Tezlik (MultiMesh)")
 ## Soya tashlash (FPS ga ta'sir qiladi).
 @export var cast_shadows: bool = false:
