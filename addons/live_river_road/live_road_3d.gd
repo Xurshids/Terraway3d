@@ -1006,5 +1006,5 @@ func get_lamp_count() -> int:
 			for lod in chunk.get_children():
 				if lod is MultiMeshInstance3D and lod.multimesh != null:
 					if String(lod.name).ends_with("_LOD0"):
-						total = maxi(total, lod.multimesh.instance_count)
+						total += lod.multimesh.instance_count
 	return total
