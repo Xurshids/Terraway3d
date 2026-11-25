@@ -1,6 +1,6 @@
 @tool
 @icon("res://addons/live_river_road/icons/river.svg")
-extends "res://addons/live_river_road/live_path_3d.gd"
+extends "live_path_3d.gd"
 
 
 func _init() -> void:
