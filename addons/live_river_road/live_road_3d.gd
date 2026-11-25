@@ -8,6 +8,7 @@ const PathIndex := preload("res://addons/live_river_road/path_index.gd")
 const JunctionSolver := preload("res://addons/live_river_road/junction_solver.gd")
 const JunctionBuilder := preload("res://addons/live_river_road/junction_builder.gd")
 const LampBuilder := preload("res://addons/live_river_road/lamp_builder.gd")
+const LampSettingsScript := preload("res://addons/live_river_road/lamp_settings.gd")
 
 @export_group("Ko'priklar (Bridges)")
 ## Yo'l daryo bilan kesishganda avtomatik ko'prik quriladi.
@@ -54,7 +55,7 @@ const LampBuilder := preload("res://addons/live_river_road/lamp_builder.gd")
 		lamps_enabled = value
 		_queue_rebuild()
 
-@export var lamp_settings: LiveLampSettings:
+@export var lamp_settings: LampSettingsScript:
 	set(value):
 		if lamp_settings != null and lamp_settings.changed.is_connected(_on_lamp_settings_changed):
 			lamp_settings.changed.disconnect(_on_lamp_settings_changed)
@@ -104,7 +105,7 @@ func _ready() -> void:
 	if junction_settings == null:
 		junction_settings = LiveJunctionSettings.new()
 	if lamp_settings == null:
-		lamp_settings = LiveLampSettings.new()
+		lamp_settings = LampSettingsScript.new()
 	if not material_changed.is_connected(_apply_bridge_materials):
 		material_changed.connect(_apply_bridge_materials)
 	if not material_changed.is_connected(_apply_junction_materials):
@@ -792,7 +793,7 @@ func _project_s(pts: PackedVector3Array, s: PackedFloat32Array, wp: Vector3) -> 
 	return best_s
 
 
-func _compute_lamp_transforms(st: LiveLampSettings) -> Array:
+func _compute_lamp_transforms(st: LampSettingsScript) -> Array:
 	var res: Array = []
 	var pts := _last_pts
 	if pts.size() < 2:
@@ -804,7 +805,7 @@ func _compute_lamp_transforms(st: LiveLampSettings) -> Array:
 			marks.append(_project_s(pts, s, to_global(curve.get_point_position(idx))))
 	marks.sort()
 	var positions: Array = []
-	if st.lamp_mode == LiveLampSettings.LampMode.POINTS:
+	if st.lamp_mode == LampSettingsScript.LampMode.POINTS:
 		positions = marks
 	else:
 		var i := 0
@@ -827,7 +828,7 @@ func _compute_lamp_transforms(st: LiveLampSettings) -> Array:
 		var seg := PathMath.seg_of(s, float(sv))
 		if _is_segment_hidden(seg):
 			continue
-		var p := PathMath.point_at(pts, s, float(sv))
+		var p: Vector3 = PathMath.point_at(pts, s, float(sv))
 		var a2 := pts[seg]
 		var b2 := pts[mini(seg + 1, pts.size() - 1)]
 		var t := Vector3(b2.x - a2.x, 0.0, b2.z - a2.z)
@@ -837,17 +838,17 @@ func _compute_lamp_transforms(st: LiveLampSettings) -> Array:
 		var side := Vector3(-t.z, 0.0, t.x)
 		var sides: Array = []
 		match st.lamp_side:
-			LiveLampSettings.LampSide.LEFT:
+			LampSettingsScript.LampSide.LEFT:
 				sides = [-1.0]
-			LiveLampSettings.LampSide.RIGHT:
+			LampSettingsScript.LampSide.RIGHT:
 				sides = [1.0]
-			LiveLampSettings.LampSide.BOTH:
+			LampSettingsScript.LampSide.BOTH:
 				sides = [-1.0, 1.0]
 			_:
 				sides = [-1.0 if alt % 2 == 0 else 1.0]
 				alt += 1
 		for sg in sides:
-			var pos := p + side * float(sg) * (path_width * 0.5 + st.edge_offset)
+			var pos: Vector3 = p + side * float(sg) * (path_width * 0.5 + st.edge_offset)
 			var y := p.y
 			if st.ground_snap:
 				var h := _get_surface_height(pos)
@@ -865,7 +866,7 @@ func _compute_lamp_transforms(st: LiveLampSettings) -> Array:
 	return res
 
 
-func _lamp_lod_mesh(st: LiveLampSettings, level: int) -> Mesh:
+func _lamp_lod_mesh(st: LampSettingsScript, level: int) -> Mesh:
 	if level == 0:
 		return st.custom_mesh if st.custom_mesh != null else LampBuilder.build_mesh(st, 0)
 	if level == 1:
@@ -873,7 +874,7 @@ func _lamp_lod_mesh(st: LiveLampSettings, level: int) -> Mesh:
 	return st.lod2_mesh if st.lod2_mesh != null else LampBuilder.build_mesh(st, 2)
 
 
-func _lamp_lod_material(st: LiveLampSettings, level: int) -> Material:
+func _lamp_lod_material(st: LampSettingsScript, level: int) -> Material:
 	if level == 0 and st.custom_mesh != null:
 		return st.custom_material
 	return null
@@ -884,7 +885,7 @@ func _create_lamp_multimesh(
 	label: String,
 	mesh: Mesh,
 	transforms: Array,
-	st: LiveLampSettings,
+	st: LampSettingsScript,
 	lod_begin: float,
 	lod_end: float
 ) -> MultiMeshInstance3D:
@@ -911,7 +912,7 @@ func _rebuild_lamps() -> void:
 	if not is_inside_tree() or curve == null:
 		return
 	_validate_lamp_marks()
-	var st := lamp_settings
+	var st: LampSettingsScript = lamp_settings
 	if not lamps_enabled or st == null or lamp_point_indices.is_empty() or _last_pts.size() < 2:
 		_free_lamp_root()
 		_lamp_sig = 0
@@ -960,8 +961,8 @@ func _rebuild_lamps() -> void:
 
 	var d0 := maxf(st.lod0_end_distance, 5.0)
 	var d1 := maxf(st.lod1_end_distance, d0 + 5.0)
-	var final_end := st.visibility_range
-	var use_lods := st.lod_enabled
+	var final_end: float = st.visibility_range
+	var use_lods: bool = st.lod_enabled
 	var chunk_keys: Array = chunks.keys()
 	chunk_keys.sort()
 	for chunk_id in chunk_keys:
