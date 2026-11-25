@@ -245,7 +245,7 @@ var _mute := false
 		lod2_head_albedo = v
 		_emit()
 
-@export_group("Haqiqiy yorug'lik")
 
+func _emit() -> void:
 	if not _mute:
 		emit_changed()
