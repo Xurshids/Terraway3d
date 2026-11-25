@@ -1,0 +1,49 @@
+extends SceneTree
+
+const LampLightController := preload("res://addons/live_river_road/lamp_light_controller.gd")
+
+
+func _initialize() -> void:
+	_test_nearest_selection()
+	_test_range_filter()
+	_test_zero_and_unbounded_limits()
+	_test_tie_order_and_mobile_cap()
+	print("Lamp LOD contract tests: PASS")
+	quit()
+
+
+func _test_nearest_selection() -> void:
+	var points: Array[Vector3] = [
+		Vector3(20, 0, 0),
+		Vector3(3, 0, 0),
+		Vector3(9, 0, 0),
+		Vector3(1, 0, 0)
+	]
+	var got := LampLightController.select_nearest_indices(points, Vector3.ZERO, 50.0, 2)
+	assert(got == [3, 1], "Nearest K selection must return ascending distance")
+
+
+func _test_range_filter() -> void:
+	var points: Array[Vector3] = [
+		Vector3(4, 0, 0),
+		Vector3(12, 0, 0),
+		Vector3(30, 0, 0)
+	]
+	var got := LampLightController.select_nearest_indices(points, Vector3.ZERO, 15.0, 8)
+	assert(got == [0, 1], "Lights outside activation radius must be excluded")
+
+
+func _test_zero_and_unbounded_limits() -> void:
+	var points: Array[Vector3] = [Vector3.ZERO, Vector3(1000, 0, 0)]
+	assert(LampLightController.select_nearest_indices(points, Vector3.ZERO, 0.0, 0).is_empty())
+	var all_near := LampLightController.select_nearest_indices(points, Vector3.ZERO, 0.0, 8)
+	assert(all_near == [0, 1], "Non-positive range means no distance culling")
+
+
+func _test_tie_order_and_mobile_cap() -> void:
+	var points: Array[Vector3] = []
+	for i in range(20):
+		points.append(Vector3(float(i + 1), 0, 0))
+	var got := LampLightController.select_nearest_indices(points, Vector3.ZERO, 0.0, 20)
+	assert(got.size() == 8, "Mobile light cap must never exceed eight")
+	assert(got == [0, 1, 2, 3, 4, 5, 6, 7], "Equal-distance ordering must be deterministic")
