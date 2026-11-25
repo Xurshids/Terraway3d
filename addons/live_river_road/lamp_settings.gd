@@ -153,7 +153,79 @@ var _mute := false
 		visibility_range = v
 		_emit()
 
+@export_group("LOD (Yoritgich ko'rinishi)")
+## 3 ta haqiqiy 3D daraja: to'liq model, soddalashtirilgan model, uzoq 3D model.
+@export var lod_enabled: bool = true:
+	set(v):
+		lod_enabled = v
+		_emit()
+## LOD0 dan LOD1 ga o'tish masofasi.
+@export_range(5.0, 500.0, 5.0, "or_greater") var lod0_end_distance: float = 45.0:
+	set(v):
+		lod0_end_distance = v
+		_emit()
+## LOD1 dan LOD2 ga o'tish masofasi.
+@export_range(10.0, 2000.0, 10.0, "or_greater") var lod1_end_distance: float = 160.0:
+	set(v):
+		lod1_end_distance = v
+		_emit()
+## O'tish chegarasidagi hysteresis; keskin oldinga-orqaga almashishni kamaytiradi.
+@export_range(0.0, 30.0, 0.5) var lod_transition_margin: float = 4.0:
+	set(v):
+		lod_transition_margin = v
+		_emit()
+## MultiMesh bitta katta yo'l bo'ylab emas, qisqa fazoviy bo'laklarda guruhlanadi.
+@export_range(20.0, 500.0, 10.0, "or_greater") var lod_chunk_length: float = 100.0:
+	set(v):
+		lod_chunk_length = v
+		_emit()
+## Ixtiyoriy qo'lda tayyorlangan soddalashtirilgan 3D modellar.
+@export var lod1_mesh: Mesh = null:
+	set(v):
+		lod1_mesh = v
+		_emit()
+@export var lod2_mesh: Mesh = null:
+	set(v):
+		lod2_mesh = v
+		_emit()
 
-func _emit() -> void:
+@export_group("LOD materiallari")
+## LOD1 uchun poya/bosh materiallari va albedo teksturalari.
+@export var lod1_pole_material: Material = null:
+	set(v):
+		lod1_pole_material = v
+		_emit()
+@export var lod1_head_material: Material = null:
+	set(v):
+		lod1_head_material = v
+		_emit()
+@export var lod1_pole_albedo: Texture2D = null:
+	set(v):
+		lod1_pole_albedo = v
+		_emit()
+@export var lod1_head_albedo: Texture2D = null:
+	set(v):
+		lod1_head_albedo = v
+		_emit()
+## LOD2 uchun yengil albedo materiallari. Bosh materiali emissive bo'lishi mumkin.
+@export var lod2_pole_material: Material = null:
+	set(v):
+		lod2_pole_material = v
+		_emit()
+@export var lod2_head_material: Material = null:
+	set(v):
+		lod2_head_material = v
+		_emit()
+@export var lod2_pole_albedo: Texture2D = null:
+	set(v):
+		lod2_pole_albedo = v
+		_emit()
+@export var lod2_head_albedo: Texture2D = null:
+	set(v):
+		lod2_head_albedo = v
+		_emit()
+
+@export_group("Haqiqiy yorug'lik")
+
 	if not _mute:
 		emit_changed()
