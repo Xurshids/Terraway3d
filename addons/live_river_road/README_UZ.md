@@ -1,4 +1,4 @@
-# Live River & Road Studio v0.4.0
+# Live River & Road Studio v0.4.1
 
 Godot 4.8 + Terrain3D uchun daryo va yo'l plagini.
 
@@ -59,7 +59,7 @@ Eski sahnalar ishlaydi (mavjud xususiyat nomlari o'zgarmagan).
 
 ---
 
-## v0.4.0 yangiliklar
+## v0.4.1 yangiliklar
 
 ### Chorrahalar va aylana (roundabout)
 - Yo'llar kesishganda (yoki bir yo'l uchi boshqasiga tegsa — T-chorraha) avtomatik **chorraha** quriladi: yumaloq burchaklar, yo'llar chorraha chetida aniq kesiladi, balandlik silliq tenglashadi.
@@ -72,13 +72,13 @@ Eski sahnalar ishlaydi (mavjud xususiyat nomlari o'zgarmagan).
 - Toolbar'da **Yoritgich** tugmasini yoqing → yo'lni tanlab, kerakli Path3D nuqtalarini **Shift+Click** bilan belgilang (qayta bosilsa belgi olinadi). Belgilar sariq halqa bilan ko'rinadi.
 - Rejimlar: faqat belgilangan nuqtalarda (`POINTS`) yoki belgilangan juftliklar orasida har N metrda (`RANGE`).
 - Tomon: chap / o'ng / ikkala / navbatma-navbat. Chetdan masofa, balandlik, qo'l uzunligi, rang va nur kuchi sozlanadi.
-- Hammasi bitta `MultiMeshInstance3D` — FPS tushmaydi. O'z modelingizni `custom_mesh` ga qo'yish mumkin. Haqiqiy yorug'lik (OmniLight3D) ixtiyoriy.
+- Yoritgichlar bir xil mesh/material bo'yicha fazoviy chunk'larga ajratilgan `MultiMeshInstance3D`larda saqlanadi. O'z modelingizni `custom_mesh` ga qo'yish mumkin. Haqiqiy yorug'lik (OmniLight3D) ixtiyoriy.
 
 ### Keskin burilishlar
 - Ichki chekka burilish radiusidan oshmaydi (o'zini kesib o'tmaydi), tashqi chekka miter bilan uzayadi.
 - UV har bir chekka uchun o'z yoy uzunligi bo'yicha hisoblanadi: tekstura cho'zilmaydi va bukilmaydi.
 
-## v0.4.0 — LOD va mobil yoritish
+## v0.4.1 — LOD va mobil yoritish
 
 ### Yoritgichlar uchun 3D LOD
 - Billboard ishlatilmaydi: LOD0 to'liq 3D, LOD1 soddalashtirilgan 3D, LOD2 uzoq masofa uchun engil 3D.
