@@ -6,6 +6,11 @@ const PathMath := preload("res://addons/live_river_road/path_math.gd")
 const WATER_SHADER := preload("res://addons/live_river_road/shaders/live_water.gdshader")
 const ROAD_SHADER := preload("res://addons/live_river_road/shaders/live_road.gdshader")
 
+@export_group("Plugin")
+## O'rnatilgan Live River & Road Studio versiyasi.
+@export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_READ_ONLY)
+var plugin_version: String = "0.4.0"
+
 @export_group("Terrain")
 
 @export var terrain: Node3D:
