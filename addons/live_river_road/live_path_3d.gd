@@ -8,8 +8,7 @@ const ROAD_SHADER := preload("res://addons/live_river_road/shaders/live_road.gds
 
 @export_group("Plugin")
 ## O'rnatilgan Live River & Road Studio versiyasi.
-@export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_READ_ONLY)
-var plugin_version: String = "0.4.2"
+@export var plugin_version: String = "0.4.3"
 
 @export_group("Terrain")
 
@@ -560,6 +559,8 @@ func _sync_material_params() -> void:
 
 func _validate_property(property: Dictionary) -> void:
 	var pname: String = property.name
+	if pname == "plugin_version":
+		property.usage |= PROPERTY_USAGE_READ_ONLY
 	if _is_river():
 		if pname in ROAD_ONLY_PROPS:
 			property.usage = PROPERTY_USAGE_STORAGE
