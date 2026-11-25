@@ -1,15 +1,32 @@
 extends SceneTree
 
 const LampLightController := preload("res://addons/live_river_road/lamp_light_controller.gd")
+const LampSettingsScript := preload("res://addons/live_river_road/lamp_settings.gd")
+const LampBuilder := preload("res://addons/live_river_road/lamp_builder.gd")
 
 
 func _initialize() -> void:
+	_test_lamp_resource_and_lod_meshes()
 	_test_nearest_selection()
 	_test_range_filter()
 	_test_zero_and_unbounded_limits()
 	_test_tie_order_and_mobile_cap()
 	print("Lamp LOD contract tests: PASS")
 	quit()
+
+
+func _test_lamp_resource_and_lod_meshes() -> void:
+	var settings: LampSettingsScript = LampSettingsScript.new()
+	assert(settings.max_active_lights == 6, "Default mobile light cap must be six")
+	settings.max_active_lights = 12
+	assert(settings.max_active_lights == 8, "The exported setter must clamp the mobile cap to eight")
+
+	for level in range(3):
+		var mesh: ArrayMesh = LampBuilder.build_mesh(settings, level)
+		assert(mesh != null, "Every lamp LOD must produce a mesh")
+		assert(mesh.get_surface_count() == 2, "Every lamp LOD must preserve pole and lamp-head surfaces")
+		var materials: Array = LampBuilder.make_materials(settings, level)
+		assert(materials.size() == 2, "Every lamp LOD must provide pole and lamp-head materials")
 
 
 func _test_nearest_selection() -> void:
