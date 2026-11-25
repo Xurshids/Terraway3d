@@ -1,4 +1,4 @@
-# Live River & Road Studio v0.4.2
+# Live River & Road Studio v0.4.3
 
 Godot 4.8 + Terrain3D uchun daryo va yo'l plagini.
 
@@ -59,7 +59,7 @@ Eski sahnalar ishlaydi (mavjud xususiyat nomlari o'zgarmagan).
 
 ---
 
-## v0.4.2 yangiliklar
+## v0.4.3 yangiliklar
 
 ### Chorrahalar va aylana (roundabout)
 - Yo'llar kesishganda (yoki bir yo'l uchi boshqasiga tegsa — T-chorraha) avtomatik **chorraha** quriladi: yumaloq burchaklar, yo'llar chorraha chetida aniq kesiladi, balandlik silliq tenglashadi.
@@ -78,7 +78,7 @@ Eski sahnalar ishlaydi (mavjud xususiyat nomlari o'zgarmagan).
 - Ichki chekka burilish radiusidan oshmaydi (o'zini kesib o'tmaydi), tashqi chekka miter bilan uzayadi.
 - UV har bir chekka uchun o'z yoy uzunligi bo'yicha hisoblanadi: tekstura cho'zilmaydi va bukilmaydi.
 
-## v0.4.2 — LOD va mobil yoritish
+## v0.4.3 — LOD va mobil yoritish
 
 ### Yoritgichlar uchun 3D LOD
 - Billboard ishlatilmaydi: LOD0 to'liq 3D, LOD1 soddalashtirilgan 3D, LOD2 uzoq masofa uchun engil 3D.
