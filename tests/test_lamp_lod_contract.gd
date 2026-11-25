@@ -3,9 +3,13 @@ extends SceneTree
 const LampLightController := preload("res://addons/live_river_road/lamp_light_controller.gd")
 const LampSettingsScript := preload("res://addons/live_river_road/lamp_settings.gd")
 const LampBuilder := preload("res://addons/live_river_road/lamp_builder.gd")
+const LivePathScript := preload("res://addons/live_river_road/live_path_3d.gd")
+const LiveRoadScript := preload("res://addons/live_river_road/live_road_3d.gd")
+const LiveRiverScript := preload("res://addons/live_river_road/live_river_3d.gd")
 
 
 func _initialize() -> void:
+	_test_script_resources_load()
 	_test_lamp_resource_and_lod_meshes()
 	_test_nearest_selection()
 	_test_range_filter()
@@ -13,6 +17,12 @@ func _initialize() -> void:
 	_test_tie_order_and_mobile_cap()
 	print("Lamp LOD contract tests: PASS")
 	quit()
+
+
+func _test_script_resources_load() -> void:
+	assert(LivePathScript.can_instantiate(), "LivePath3D script must load")
+	assert(LiveRoadScript.can_instantiate(), "LiveRoad3D script must load")
+	assert(LiveRiverScript.can_instantiate(), "LiveRiver3D script must load")
 
 
 func _test_lamp_resource_and_lod_meshes() -> void:
