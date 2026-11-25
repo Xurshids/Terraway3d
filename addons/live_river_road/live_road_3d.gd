@@ -988,7 +988,8 @@ func _rebuild_lamps() -> void:
 		var controller := load("res://addons/live_river_road/lamp_light_controller.gd").new() as Node3D
 		controller.name = "LampLightController"
 		root.add_child(controller)
-		controller.configure(
+		controller.call(
+			"configure",
 			all_lights,
 			st.max_active_lights,
 			st.light_activation_range,
