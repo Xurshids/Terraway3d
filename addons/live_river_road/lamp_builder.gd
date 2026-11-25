@@ -3,11 +3,12 @@ extends RefCounted
 ## Yoritgich mesh'i va materiallari. Har bir LOD uchun alohida 3D mesh yaratadi.
 
 const BridgeBuilder := preload("res://addons/live_river_road/bridge_builder.gd")
+const LampSettingsScript := preload("res://addons/live_river_road/lamp_settings.gd")
 
 
 ## Poya asosi (0,0,0), balandlik +Y, yo'l tomon +X.
 ## Sirt 0 = ustun, sirt 1 = chiroq boshi.
-static func build_mesh(st: LiveLampSettings, lod_level: int = 0) -> ArrayMesh:
+static func build_mesh(st: LampSettingsScript, lod_level: int = 0) -> ArrayMesh:
 	var out := BridgeBuilder.Out.new()
 	var H := st.pole_height
 	var r := st.pole_radius
@@ -43,7 +44,7 @@ static func build_mesh(st: LiveLampSettings, lod_level: int = 0) -> ArrayMesh:
 	return mesh
 
 
-static func make_materials(st: LiveLampSettings, lod_level: int = 0) -> Array:
+static func make_materials(st: LampSettingsScript, lod_level: int = 0) -> Array:
 	var level := clampi(lod_level, 0, 2)
 	var pole: Material = st.pole_material if level == 0 else null
 	var head: Material = st.head_material if level == 0 else null
