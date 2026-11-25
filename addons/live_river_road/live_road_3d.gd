@@ -935,12 +935,13 @@ func _rebuild_lamps() -> void:
 	# ko'rinish/culling hisobida ushlab turmaydi.
 	var chunks: Dictionary = {}
 	var chunk_length := maxf(st.lod_chunk_length, 20.0)
+	var path_distances := PathMath.arc_lengths(_last_pts)
 	var all_lights: Array[OmniLight3D] = []
 	var light_local := Vector3(st.arm_length, st.pole_height + st.arm_rise - 0.25, 0.0) if st.custom_mesh == null else Vector3(0.0, st.pole_height, 0.0)
 
 	for xf_variant in transforms:
 		var xf: Transform3D = xf_variant
-		var chunk_id := int(floor(_project_s(_last_pts, PathMath.arc_lengths(_last_pts), xf.origin) / chunk_length))
+		var chunk_id := int(floor(_project_s(_last_pts, path_distances, xf.origin) / chunk_length))
 		if not chunks.has(chunk_id):
 			chunks[chunk_id] = []
 		(chunks[chunk_id] as Array).append(xf)
@@ -973,9 +974,15 @@ func _rebuild_lamps() -> void:
 			_create_lamp_multimesh(chunk_root, "Lamps_LOD0", _lamp_lod_mesh(st, 0), chunk_transforms, st, 0.0, final_end)
 			continue
 
-		_create_lamp_multimesh(chunk_root, "Lamps_LOD0", _lamp_lod_mesh(st, 0), chunk_transforms, st, 0.0, d0)
-		_create_lamp_multimesh(chunk_root, "Lamps_LOD1", _lamp_lod_mesh(st, 1), chunk_transforms, st, d0, d1)
-		_create_lamp_multimesh(chunk_root, "Lamps_LOD2", _lamp_lod_mesh(st, 2), chunk_transforms, st, d1, final_end)
+		if final_end > 0.0 and final_end <= d0:
+			_create_lamp_multimesh(chunk_root, "Lamps_LOD0", _lamp_lod_mesh(st, 0), chunk_transforms, st, 0.0, final_end)
+		elif final_end > 0.0 and final_end <= d1:
+			_create_lamp_multimesh(chunk_root, "Lamps_LOD0", _lamp_lod_mesh(st, 0), chunk_transforms, st, 0.0, d0)
+			_create_lamp_multimesh(chunk_root, "Lamps_LOD1", _lamp_lod_mesh(st, 1), chunk_transforms, st, d0, final_end)
+		else:
+			_create_lamp_multimesh(chunk_root, "Lamps_LOD0", _lamp_lod_mesh(st, 0), chunk_transforms, st, 0.0, d0)
+			_create_lamp_multimesh(chunk_root, "Lamps_LOD1", _lamp_lod_mesh(st, 1), chunk_transforms, st, d0, d1)
+			_create_lamp_multimesh(chunk_root, "Lamps_LOD2", _lamp_lod_mesh(st, 2), chunk_transforms, st, d1, final_end)
 
 	if st.real_lights and not all_lights.is_empty():
 		var controller := load("res://addons/live_river_road/lamp_light_controller.gd").new() as Node3D
