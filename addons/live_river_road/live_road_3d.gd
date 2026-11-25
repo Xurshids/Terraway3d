@@ -865,6 +865,48 @@ func _compute_lamp_transforms(st: LiveLampSettings) -> Array:
 	return res
 
 
+func _lamp_lod_mesh(st: LiveLampSettings, level: int) -> Mesh:
+	if level == 0:
+		return st.custom_mesh if st.custom_mesh != null else LampBuilder.build_mesh(st, 0)
+	if level == 1:
+		return st.lod1_mesh if st.lod1_mesh != null else LampBuilder.build_mesh(st, 1)
+	return st.lod2_mesh if st.lod2_mesh != null else LampBuilder.build_mesh(st, 2)
+
+
+func _lamp_lod_material(st: LiveLampSettings, level: int) -> Material:
+	if level == 0 and st.custom_mesh != null:
+		return st.custom_material
+	return null
+
+
+func _create_lamp_multimesh(
+	parent: Node3D,
+	label: String,
+	mesh: Mesh,
+	transforms: Array,
+	st: LiveLampSettings,
+	lod_begin: float,
+	lod_end: float
+) -> MultiMeshInstance3D:
+	if mesh == null or transforms.is_empty():
+		return null
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.mesh = mesh
+	mm.instance_count = transforms.size()
+	for i in range(transforms.size()):
+		mm.set_instance_transform(i, transforms[i] as Transform3D)
+	var instance := MultiMeshInstance3D.new()
+	instance.name = label
+	instance.multimesh = mm
+	instance.material_override = _lamp_lod_material(st, 0) if label.ends_with("_LOD0") else null
+	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if st.cast_shadows and label.ends_with("_LOD0") else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	instance.visibility_range_begin = maxf(lod_begin, 0.0)
+	instance.visibility_range_end = maxf(lod_end, 0.0)
+	parent.add_child(instance)
+	return instance
+
+
 func _rebuild_lamps() -> void:
 	if not is_inside_tree() or curve == null:
 		return
@@ -883,40 +925,79 @@ func _rebuild_lamps() -> void:
 	if transforms.is_empty():
 		_free_lamp_root()
 		return
+
 	var root := _get_lamp_root()
 	for ch in root.get_children():
 		root.remove_child(ch)
 		ch.queue_free()
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.mesh = st.custom_mesh if st.custom_mesh != null else LampBuilder.build_mesh(st)
-	mm.instance_count = transforms.size()
-	for i in range(transforms.size()):
-		mm.set_instance_transform(i, transforms[i])
-	var mmi := MultiMeshInstance3D.new()
-	mmi.name = "Lamps"
-	mmi.multimesh = mm
-	if st.custom_mesh != null and st.custom_material != null:
-		mmi.material_override = st.custom_material
-	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if st.cast_shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	if st.visibility_range > 0.0:
-		mmi.visibility_range_end = st.visibility_range
-	root.add_child(mmi)
-	if st.real_lights:
-		for xf in transforms:
+
+	# Har bir fazoviy chunk va LOD alohida MultiMesh: uzoq chunk yaqin chunkni
+	# ko'rinish/culling hisobida ushlab turmaydi.
+	var chunks: Dictionary = {}
+	var chunk_length := maxf(st.lod_chunk_length, 20.0)
+	var all_lights: Array[OmniLight3D] = []
+	var light_local := Vector3(st.arm_length, st.pole_height + st.arm_rise - 0.25, 0.0) if st.custom_mesh == null else Vector3(0.0, st.pole_height, 0.0)
+
+	for xf_variant in transforms:
+		var xf: Transform3D = xf_variant
+		var chunk_id := int(floor(_project_s(_last_pts, PathMath.arc_lengths(_last_pts), xf.origin) / chunk_length))
+		if not chunks.has(chunk_id):
+			chunks[chunk_id] = []
+		(chunks[chunk_id] as Array).append(xf)
+
+		if st.real_lights:
 			var light := OmniLight3D.new()
+			light.name = "LampLight_%d" % all_lights.size()
 			light.light_color = st.light_color
 			light.omni_range = st.light_range
 			light.light_energy = st.light_energy
 			light.shadow_enabled = false
-			var local := Vector3(st.arm_length, st.pole_height + st.arm_rise - 0.25, 0.0) if st.custom_mesh == null else Vector3(0.0, st.pole_height, 0.0)
-			light.position = (xf as Transform3D) * local
+			light.position = xf * light_local
+			light.visible = false
 			root.add_child(light)
+			all_lights.append(light)
+
+	var d0 := maxf(st.lod0_end_distance, 5.0)
+	var d1 := maxf(st.lod1_end_distance, d0 + 5.0)
+	var final_end := st.visibility_range
+	var use_lods := st.lod_enabled
+	var chunk_keys: Array = chunks.keys()
+	chunk_keys.sort()
+	for chunk_id in chunk_keys:
+		var chunk_transforms: Array = chunks[chunk_id]
+		var chunk_root := Node3D.new()
+		chunk_root.name = "LampChunk_%d" % int(chunk_id)
+		root.add_child(chunk_root)
+
+		if not use_lods:
+			_create_lamp_multimesh(chunk_root, "Lamps_LOD0", _lamp_lod_mesh(st, 0), chunk_transforms, st, 0.0, final_end)
+			continue
+
+		_create_lamp_multimesh(chunk_root, "Lamps_LOD0", _lamp_lod_mesh(st, 0), chunk_transforms, st, 0.0, d0)
+		_create_lamp_multimesh(chunk_root, "Lamps_LOD1", _lamp_lod_mesh(st, 1), chunk_transforms, st, d0, d1)
+		_create_lamp_multimesh(chunk_root, "Lamps_LOD2", _lamp_lod_mesh(st, 2), chunk_transforms, st, d1, final_end)
+
+	if st.real_lights and not all_lights.is_empty():
+		var controller := load("res://addons/live_river_road/lamp_light_controller.gd").new() as Node3D
+		controller.name = "LampLightController"
+		root.add_child(controller)
+		controller.configure(
+			all_lights,
+			st.max_active_lights,
+			st.light_activation_range,
+			st.light_update_interval,
+			st.night_mode_enabled
+		)
 
 
 func get_lamp_count() -> int:
-	if is_instance_valid(_lamp_root):
-		var m := _lamp_root.get_node_or_null("Lamps") as MultiMeshInstance3D
-		if m != null and m.multimesh != null:
-			return m.multimesh.instance_count
-	return 0
+	if not is_instance_valid(_lamp_root):
+		return 0
+	var total := 0
+	for chunk in _lamp_root.get_children():
+		if chunk is Node3D and String(chunk.name).begins_with("LampChunk_"):
+			for lod in chunk.get_children():
+				if lod is MultiMeshInstance3D and lod.multimesh != null:
+					if String(lod.name).ends_with("_LOD0"):
+						total = maxi(total, lod.multimesh.instance_count)
+	return total
