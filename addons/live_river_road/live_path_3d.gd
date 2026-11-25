@@ -9,7 +9,7 @@ const ROAD_SHADER := preload("res://addons/live_river_road/shaders/live_road.gds
 @export_group("Plugin")
 ## O'rnatilgan Live River & Road Studio versiyasi.
 @export_custom(PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_READ_ONLY)
-var plugin_version: String = "0.4.1"
+var plugin_version: String = "0.4.2"
 
 @export_group("Terrain")
 
