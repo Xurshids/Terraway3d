@@ -1,6 +1,6 @@
 @tool
 @icon("res://addons/live_river_road/icons/road.svg")
-extends "res://addons/live_river_road/live_path_3d.gd"
+extends "live_path_3d.gd"
 ## Yo'l. Daryo bilan kesishgan joyda avtomatik ko'prik quradi.
 
 const BridgeBuilder := preload("res://addons/live_river_road/bridge_builder.gd")
